@@ -20,24 +20,6 @@ pip install -r requirements.txt
 python app_image_generator.py
 ```
 
-Buka: http://localhost:5000
-
-## Deploy Online (Railway/Render)
-
-### 1. Upload ke GitHub
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/USERNAME/kamus-korea-indonesia.git
-git push -u origin main
-```
-
-### 2. Deploy ke Railway.app
-1. Login: https://railway.app
-2. New Project → Deploy from GitHub
-
-
 ## Struktur Project
 
 ```
