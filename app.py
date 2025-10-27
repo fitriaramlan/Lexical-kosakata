@@ -24,16 +24,16 @@ def init_db():
             # load both sheets
             df1 = pd.read_excel('DAFTAR TYPE.xlsx', sheet_name='EPS 1')
             
-            for _, r in df1.iterrows():
+            for _, row in df1.iterrows():
                 c.execute('INSERT INTO vocabulary (no, type, frequency, pos, terjemahan, definisi, kolokasi, contoh_kalimat, gambar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    (r['NO'], r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'], r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR']))
+                    (row['NO'], row['TYPE'], row['FREQUENCY'], row['POS'], row['TERJEMAHAN'], row['DEFINISI'], row['KOLOKASI'], row['CONTOH KALIMAT'], row['GAMBAR']))
             print(f"Loaded {len(df1)} from EPS 1")
             
             df2 = pd.read_excel('DAFTAR TYPE.xlsx', sheet_name='EPS 2')
             max_no = df1['NO'].max()
-            for _, r in df2.iterrows():
+            for _, row in df2.iterrows():
                 c.execute('INSERT INTO vocabulary (no, type, frequency, pos, terjemahan, definisi, kolokasi, contoh_kalimat, gambar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    (int(r['NO']) + max_no, r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'], r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR']))
+                    (int(row['NO']) + max_no, row['TYPE'], row['FREQUENCY'], row['POS'], row['TERJEMAHAN'], row['DEFINISI'], row['KOLOKASI'], row['CONTOH KALIMAT'], row['GAMBAR']))
             print(f"Loaded {len(df2)} from EPS 2")
             
             conn.commit()
@@ -65,14 +65,14 @@ def get_categories():
     conn = get_db()
     cur = conn.cursor()
     cur.execute('SELECT DISTINCT pos FROM vocabulary WHERE pos IS NOT NULL ORDER BY pos')
-    cats = [r['pos'] for r in cur.fetchall()]
+    categories = [row['pos'] for row in cur.fetchall()]
     conn.close()
-    return jsonify({'categories': cats})
+    return jsonify({'categories': categories})
 
 @app.route('/api/search')
 def search_vocabulary():
-    q = request.args.get('q', '').strip().lower()
-    cat = request.args.get('category', '').strip()
+    query = request.args.get('q', '').strip().lower()
+    category = request.args.get('category', '').strip()
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
     
@@ -82,30 +82,30 @@ def search_vocabulary():
     sql = "SELECT * FROM vocabulary WHERE 1=1"
     params = []
     
-    if cat:
+    if category:
         sql += " AND pos = ?"
-        params.append(cat)
+        params.append(category)
     
     cur.execute(sql, params)
-    all_results = [dict(r) for r in cur.fetchall()]
+    all_results = [dict(row) for row in cur.fetchall()]
     
-    if q:
+    if query:
         results = []
-        for r in all_results:
+        for row in all_results:
             # check korean
-            if q in r.get('type', '').lower():
-                results.append(r)
+            if query in row.get('type', '').lower():
+                results.append(row)
                 continue
             # check indonesian
-            trans = clean_translation(r.get('terjemahan', ''))
-            if q in trans.lower():
-                results.append(r)
+            translation = clean_translation(row.get('terjemahan', ''))
+            if query in translation.lower():
+                results.append(row)
         all_results = results
     
     total = len(all_results)
-    start = (page - 1) * per_page
-    end = start + per_page
-    results = all_results[start:end]
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    results = all_results[start_idx:end_idx]
     
     conn.close()
     
@@ -121,11 +121,11 @@ def get_vocabulary(vocab_id):
     conn = get_db()
     cur = conn.cursor()
     cur.execute('SELECT * FROM vocabulary WHERE id = ?', (vocab_id,))
-    r = cur.fetchone()
+    row = cur.fetchone()
     conn.close()
     
-    if r:
-        return jsonify(dict(r))
+    if row:
+        return jsonify(dict(row))
     return jsonify({'error': 'Not found'}), 404
 
 if __name__ == '__main__':

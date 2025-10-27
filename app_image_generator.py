@@ -32,10 +32,10 @@ def detect_kategori(text):
     if not text:
         return None
     text_clean = clean_translation(text)
-    for kat, kw_list in KATEGORI_KEYWORD.items():
-        for kw in kw_list:
-            if kw in text_clean.lower():
-                return kat
+    for kategori_name, keyword_list in KATEGORI_KEYWORD.items():
+        for keyword in keyword_list:
+            if keyword in text_clean.lower():
+                return kategori_name
     return None
 
 def init_db():
@@ -59,21 +59,21 @@ def init_db():
         try:
             # load eps 1
             df1 = pd.read_excel('DAFTAR TYPE.xlsx', sheet_name='EPS 1')
-            for _, r in df1.iterrows():
-                kat = detect_kategori(r.get('TERJEMAHAN'))
+            for _, row in df1.iterrows():
+                kategori = detect_kategori(row.get('TERJEMAHAN'))
                 c.execute('INSERT INTO vocabulary VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    (None, r['NO'], r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'],
-                     r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR'], kat, None))
+                    (None, row['NO'], row['TYPE'], row['FREQUENCY'], row['POS'], row['TERJEMAHAN'],
+                     row['DEFINISI'], row['KOLOKASI'], row['CONTOH KALIMAT'], row['GAMBAR'], kategori, None))
             print(f"Loaded {len(df1)} from EPS 1")
             
             # load eps 2
             df2 = pd.read_excel('DAFTAR TYPE.xlsx', sheet_name='EPS 2')
             max_no = df1['NO'].max()
-            for _, r in df2.iterrows():
-                kat = detect_kategori(r.get('TERJEMAHAN'))
+            for _, row in df2.iterrows():
+                kategori = detect_kategori(row.get('TERJEMAHAN'))
                 c.execute('INSERT INTO vocabulary VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    (None, int(r['NO']) + max_no, r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'],
-                     r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR'], kat, None))
+                    (None, int(row['NO']) + max_no, row['TYPE'], row['FREQUENCY'], row['POS'], row['TERJEMAHAN'],
+                     row['DEFINISI'], row['KOLOKASI'], row['CONTOH KALIMAT'], row['GAMBAR'], kategori, None))
             print(f"Loaded {len(df2)} from EPS 2")
             
             conn.commit()
@@ -136,23 +136,23 @@ def get_categories():
     conn = get_db()
     cur = conn.cursor()
     cur.execute('SELECT DISTINCT pos FROM vocabulary WHERE pos IS NOT NULL ORDER BY pos')
-    cats = [r['pos'] for r in cur.fetchall()]
+    categories = [row['pos'] for row in cur.fetchall()]
     conn.close()
-    return jsonify({'categories': cats})
+    return jsonify({'categories': categories})
 
 @app.route('/api/kategori')
 def get_kategori():
     conn = get_db()
     cur = conn.cursor()
     cur.execute('SELECT DISTINCT kategori FROM vocabulary WHERE kategori IS NOT NULL')
-    kats = [r['kategori'] for r in cur.fetchall()]
+    kategori_list = [row['kategori'] for row in cur.fetchall()]
     conn.close()
-    return jsonify({'kategori': kats})
+    return jsonify({'kategori': kategori_list})
 
 @app.route('/api/search')
 def search_vocabulary():
-    q = request.args.get('q', '').strip().lower()
-    cat = request.args.get('category', '').strip()
+    query = request.args.get('q', '').strip().lower()
+    category = request.args.get('category', '').strip()
     kategori = request.args.get('kategori', '').strip()
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
@@ -164,45 +164,45 @@ def search_vocabulary():
     sql = "SELECT * FROM vocabulary WHERE 1=1"
     params = []
     
-    if cat:
+    if category:
         sql += " AND pos = ?"
-        params.append(cat)
+        params.append(category)
     
     if kategori:
         sql += " AND kategori = ?"
         params.append(kategori)
     
     cur.execute(sql, params)
-    all_results = [dict(r) for r in cur.fetchall()]
+    all_results = [dict(row) for row in cur.fetchall()]
     
-    if q:
+    if query:
         results = []
-        for r in all_results:
+        for row in all_results:
             # check korean
-            if q in str(r.get('type', '')).lower():
-                results.append(r)
+            if query in str(row.get('type', '')).lower():
+                results.append(row)
                 continue
             # check indonesian
-            trans = clean_translation(r.get('terjemahan', ''))
-            if q in trans.lower():
-                results.append(r)
+            translation = clean_translation(row.get('terjemahan', ''))
+            if query in translation.lower():
+                results.append(row)
         all_results = results
     
     # add images
     if show_images:
         for item in all_results:
             if not item.get('gambar'):
-                trans = item.get('terjemahan', '')
-                if trans:
-                    ind_word = clean_translation(trans).split()[0]
+                translation = item.get('terjemahan', '')
+                if translation:
+                    indonesian_word = clean_translation(translation).split()[0]
                 else:
-                    ind_word = item.get('type', '')
-                item['gambar'] = make_image(item.get('pos', 'Vocabulary'), item.get('type', ''), ind_word)
+                    indonesian_word = item.get('type', '')
+                item['gambar'] = make_image(item.get('pos', 'Vocabulary'), item.get('type', ''), indonesian_word)
     
     total = len(all_results)
-    start = (page - 1) * per_page
-    end = start + per_page
-    results = all_results[start:end]
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    results = all_results[start_idx:end_idx]
     
     conn.close()
     
@@ -218,17 +218,17 @@ def get_vocabulary(vocab_id):
     conn = get_db()
     cur = conn.cursor()
     cur.execute('SELECT * FROM vocabulary WHERE id = ?', (vocab_id,))
-    r = cur.fetchone()
+    row = cur.fetchone()
     conn.close()
     
-    if not r:
+    if not row:
         return jsonify({'error': 'Not found'}), 404
     
-    data = dict(r)
+    data = dict(row)
     if not data.get('gambar'):
-        trans = data.get('terjemahan', '')
-        ind_word = clean_translation(trans).split()[0] if trans else data.get('type', '')
-        data['gambar'] = make_image(data.get('pos', 'Vocabulary'), data.get('type', ''), ind_word)
+        translation = data.get('terjemahan', '')
+        indonesian_word = clean_translation(translation).split()[0] if translation else data.get('type', '')
+        data['gambar'] = make_image(data.get('pos', 'Vocabulary'), data.get('type', ''), indonesian_word)
     
     return jsonify(data)
 
