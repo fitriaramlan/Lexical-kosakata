@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamus Kosakata Korea - Indonesia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .category-filter {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-filter:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .vocab-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .vocab-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        .vocab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .vocab-korean {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .vocab-pos {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .vocab-translation {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .vocab-definition {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .vocab-collocation, .vocab-example {
+            font-size: 0.85em;
+            color: #888;
+            padding: 8px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            margin-top: 8px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .vocab-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-top: 15px;
+            background: #f0f0f0;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1.2em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .pagination button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .stats {
+            text-align: center;
+            color: #888;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇰🇷 Kamus Kosakata Korea - Indonesia 🇮🇩</h1>
+            <p class="subtitle">Pelajari kosakata bahasa Korea dengan mudah dan menyenangkan</p>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Cari kosakata (Korea atau Indonesia)...">
+            </div>
+            <select class="category-filter" id="categoryFilter">
+                <option value="">Semua Kategori</option>
+            </select>
+        </div>
+        
+        <div id="stats" class="stats"></div>
+        
+        <div id="vocabularyContainer" class="vocabulary-grid">
+            <div class="loading">Memuat data...</div>
+        </div>
+        
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let categories = [];
+        
+        // Load categories
+        fetch('/api/categories')
+            .then(res => res.json())
+            .then(data => {
+                categories = data.categories;
+                const select = document.getElementById('categoryFilter');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    select.appendChild(option);
+                });
+            });
+        
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                loadVocabulary();
+            }, 500);
+        });
+        
+        document.getElementById('categoryFilter').addEventListener('change', function() {
+            currentPage = 1;
+            loadVocabulary();
+        });
+        
+        function loadVocabulary() {
+            const query = document.getElementById('searchInput').value;
+            const category = document.getElementById('categoryFilter').value;
+            
+            document.getElementById('vocabularyContainer').innerHTML = '<div class="loading">Memuat data...</div>';
+            
+            const url = `/api/search?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${currentPage}`;
+            
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    displayVocabulary(data.results);
+                    displayPagination(data.total, data.per_page);
+                    updateStats(data.total, data.results.length);
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    document.getElementById('vocabularyContainer').innerHTML = 
+                        '<div class="no-results">Error loading data</div>';
+                });
+        }
+        
+        function displayVocabulary(items) {
+            const container = document.getElementById('vocabularyContainer');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="no-results">Tidak ada hasil ditemukan</div>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="vocab-card">
+                    <div class="vocab-header">
+                        <div class="vocab-korean">${escapeHtml(item.type || '')}</div>
+                        ${item.pos ? `<div class="vocab-pos">${escapeHtml(item.pos)}</div>` : ''}
+                    </div>
+                    ${item.terjemahan ? `<div class="vocab-translation">${formatTranslation(item.terjemahan)}</div>` : ''}
+                    ${item.definisi ? `<div class="vocab-definition">${escapeHtml(item.definisi)}</div>` : ''}
+                    ${item.kolokasi ? `<div class="vocab-collocation"><strong>Kolokasi:</strong> ${escapeHtml(item.kolokasi)}</div>` : ''}
+                    ${item.contoh_kalimat ? `<div class="vocab-example"><strong>Contoh:</strong> ${escapeHtml(item.contoh_kalimat)}</div>` : ''}
+                    ${item.gambar ? `<img src="${escapeHtml(item.gambar)}" alt="${escapeHtml(item.type)}" class="vocab-image" onerror="this.style.display='none'">` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function formatTranslation(text) {
+            if (!text) return '';
+            // Format the translation text
+            const lines = text.split('\n');
+            const translation = lines[0];
+            return escapeHtml(translation);
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function displayPagination(total, perPage) {
+            const totalPages = Math.ceil(total / perPage);
+            const container = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Sebelumnya</button>`;
+            
+            const maxPages = Math.min(totalPages, 10);
+            const startPage = Math.max(1, currentPage - 4);
+            
+            for (let i = startPage; i < startPage + maxPages && i <= totalPages; i++) {
+                html += `<button onclick="changePage(${i})" ${i === currentPage ? 'style="background: #667eea; color: white;"' : ''}>${i}</button>`;
+            }
+            
+            html += `<button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Selanjutnya</button>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            loadVocabulary();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function updateStats(total, shown) {
+            document.getElementById('stats').textContent = `Menampilkan ${shown} dari ${total} kosakata`;
+        }
+        
+        // Initial load
+        loadVocabulary();
+    </script>
+</body>
+</html>
+

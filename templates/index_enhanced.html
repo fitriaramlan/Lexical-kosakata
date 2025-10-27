@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamus Kosakata Korea - Indonesia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .category-filter {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .category-filter:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .vocab-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            overflow: hidden;
+        }
+        
+        .vocab-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            border-color: #667eea;
+        }
+        
+        .vocab-image-container {
+            width: 100%;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            background: #667eea;
+        }
+        
+        .vocab-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .vocab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .vocab-korean {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .vocab-pos {
+            background: #667eea;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 25px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .vocab-translation {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 12px;
+            font-weight: 600;
+            min-height: 30px;
+        }
+        
+        .vocab-definition {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            background: rgba(255,255,255,0.8);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .vocab-collocation, .vocab-example {
+            font-size: 0.85em;
+            color: #666;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            margin-top: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .vocab-collocation strong, .vocab-example strong {
+            color: #667eea;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1.2em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .pagination button {
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .stats {
+            text-align: center;
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .toggle-images {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .toggle-images:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .toggle-images.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇰🇷 Kamus Kosakata Korea - Indonesia 🇮🇩</h1>
+            <p class="subtitle">Pelajari kosakata bahasa Korea dengan mudah dan menyenangkan</p>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Cari kosakata (Korea atau Indonesia)...">
+            </div>
+            <select class="category-filter" id="categoryFilter">
+                <option value="">Semua Kategori</option>
+            </select>
+            <button class="toggle-images active" id="toggleImages">🖼️ Tampilkan Gambar</button>
+        </div>
+        
+        <div id="stats" class="stats"></div>
+        
+        <div id="vocabularyContainer" class="vocabulary-grid">
+            <div class="loading">Memuat data...</div>
+        </div>
+        
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let categories = [];
+        let showImages = true;
+        
+        // Load categories
+        fetch('/api/categories')
+            .then(res => res.json())
+            .then(data => {
+                categories = data.categories;
+                const select = document.getElementById('categoryFilter');
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    select.appendChild(option);
+                });
+            });
+        
+        // Toggle images
+        document.getElementById('toggleImages').addEventListener('click', function() {
+            showImages = !showImages;
+            this.classList.toggle('active', showImages);
+            this.textContent = showImages ? '🖼️ Tampilkan Gambar' : '📝 Sembunyikan Gambar';
+            loadVocabulary();
+        });
+        
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                loadVocabulary();
+            }, 500);
+        });
+        
+        document.getElementById('categoryFilter').addEventListener('change', function() {
+            currentPage = 1;
+            loadVocabulary();
+        });
+        
+        function loadVocabulary() {
+            const query = document.getElementById('searchInput').value;
+            const category = document.getElementById('categoryFilter').value;
+            
+            document.getElementById('vocabularyContainer').innerHTML = '<div class="loading">Memuat data...</div>';
+            
+            const url = `/api/search?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${currentPage}&include_images=${showImages}`;
+            
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    displayVocabulary(data.results);
+                    displayPagination(data.total, data.per_page);
+                    updateStats(data.total, data.results.length);
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    document.getElementById('vocabularyContainer').innerHTML = 
+                        '<div class="no-results">Error loading data</div>';
+                });
+        }
+        
+        function displayVocabulary(items) {
+            const container = document.getElementById('vocabularyContainer');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="no-results">Tidak ada hasil ditemukan</div>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="vocab-card">
+                    ${item.gambar && showImages ? `
+                        <div class="vocab-image-container">
+                            <img src="${escapeHtml(item.gambar)}" alt="${escapeHtml(item.type)}" class="vocab-image" onerror="this.parentElement.style.display='none'">
+                        </div>
+                    ` : ''}
+                    <div class="vocab-header">
+                        <div class="vocab-korean">${escapeHtml(item.type || '')}</div>
+                        ${item.pos ? `<div class="vocab-pos">${escapeHtml(item.pos)}</div>` : ''}
+                    </div>
+                    ${item.terjemahan ? `<div class="vocab-translation">${formatTranslation(item.terjemahan)}</div>` : ''}
+                    ${item.definisi ? `<div class="vocab-definition">${escapeHtml(item.definisi)}</div>` : ''}
+                    ${item.kolokasi ? `<div class="vocab-collocation"><strong>Kolokasi:</strong> ${escapeHtml(item.kolokasi)}</div>` : ''}
+                    ${item.contoh_kalimat ? `<div class="vocab-example"><strong>Contoh:</strong> ${escapeHtml(item.contoh_kalimat)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function formatTranslation(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            const translation = lines[0];
+            return escapeHtml(translation);
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function displayPagination(total, perPage) {
+            const totalPages = Math.ceil(total / perPage);
+            const container = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '← Sebelumnya';
+            prevBtn.disabled = currentPage === 1;
+            if (!prevBtn.disabled) {
+                prevBtn.addEventListener('click', () => changePage(currentPage - 1));
+            }
+            container.appendChild(prevBtn);
+            
+            const maxPages = Math.min(totalPages, 10);
+            const startPage = Math.max(1, currentPage - 4);
+            
+            for (let i = startPage; i < startPage + maxPages && i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                if (i === currentPage) {
+                    btn.style.background = '#667eea';
+                    btn.style.color = 'white';
+                }
+                btn.addEventListener('click', () => changePage(i));
+                container.appendChild(btn);
+            }
+            
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Selanjutnya →';
+            nextBtn.disabled = currentPage >= totalPages;
+            if (!nextBtn.disabled) {
+                nextBtn.addEventListener('click', () => changePage(currentPage + 1));
+            }
+            container.appendChild(nextBtn);
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            loadVocabulary();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function updateStats(total, shown) {
+            document.getElementById('stats').textContent = `Menampilkan ${shown} dari ${total} kosakata`;
+        }
+        
+        // Initial load
+        loadVocabulary();
+    </script>
+</body>
+</html>
+
