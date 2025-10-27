@@ -36,10 +36,7 @@ git push -u origin main
 ### 2. Deploy ke Railway.app
 1. Login: https://railway.app
 2. New Project → Deploy from GitHub
-3. Pilih repository Anda
-4. Done! Dapatkan link gratis
 
-Lihat **GITHUB_DEPLOY_STEPS.md** untuk panduan lengkap.
 
 ## Struktur Project
 
