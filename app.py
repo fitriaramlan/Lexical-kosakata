@@ -11,21 +11,11 @@ def init_db():
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
     
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS vocabulary (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            no INTEGER,
-            type TEXT NOT NULL,
-            frequency REAL,
-            pos TEXT,
-            terjemahan TEXT,
-            definisi TEXT,
-            kolokasi TEXT,
-            contoh_kalimat TEXT,
-            gambar TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+    c.execute('''CREATE TABLE IF NOT EXISTS vocabulary (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, no INTEGER, type TEXT NOT NULL, 
+        frequency REAL, pos TEXT, terjemahan TEXT, definisi TEXT, kolokasi TEXT, 
+        contoh_kalimat TEXT, gambar TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
     
     count = c.execute('SELECT COUNT(*) FROM vocabulary').fetchone()[0]
     
@@ -33,34 +23,21 @@ def init_db():
         try:
             # load both sheets
             df1 = pd.read_excel('DAFTAR TYPE.xlsx', sheet_name='EPS 1')
-            total = 0
             
             for _, r in df1.iterrows():
-                c.execute('''
-                    INSERT INTO vocabulary 
-                    (no, type, frequency, pos, terjemahan, definisi, kolokasi, contoh_kalimat, gambar)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (r['NO'], r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'], 
-                      r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR']))
+                c.execute('INSERT INTO vocabulary (no, type, frequency, pos, terjemahan, definisi, kolokasi, contoh_kalimat, gambar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    (r['NO'], r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'], r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR']))
             print(f"Loaded {len(df1)} from EPS 1")
-            total += len(df1)
             
             df2 = pd.read_excel('DAFTAR TYPE.xlsx', sheet_name='EPS 2')
             max_no = df1['NO'].max()
-            
             for _, r in df2.iterrows():
-                c.execute('''
-                    INSERT INTO vocabulary 
-                    (no, type, frequency, pos, terjemahan, definisi, kolokasi, contoh_kalimat, gambar)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (int(r['NO']) + max_no, r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'],
-                      r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR']))
-            
+                c.execute('INSERT INTO vocabulary (no, type, frequency, pos, terjemahan, definisi, kolokasi, contoh_kalimat, gambar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    (int(r['NO']) + max_no, r['TYPE'], r['FREQUENCY'], r['POS'], r['TERJEMAHAN'], r['DEFINISI'], r['KOLOKASI'], r['CONTOH KALIMAT'], r['GAMBAR']))
             print(f"Loaded {len(df2)} from EPS 2")
-            total += len(df2)
             
             conn.commit()
-            print(f"Done. Total: {total} entries")
+            print(f"Total entries: {len(df1) + len(df2)}")
         except Exception as e:
             print(f"Excel error: {e}")
     
